@@ -8,6 +8,7 @@ interface SiteRecord {
     url: string;
     login: string;
     password: string;
+    category?: string;
 }
 
 const pagesAfterE1 : SiteRecord[] = [];
@@ -192,6 +193,7 @@ async function run() {
             
             console.log(`[ETAP 1]: Ustawiono Layout2 oraz dodano <h1>Blog</h1>. Komunikat: ${await successAlert.first().locator('.alert-message').innerText()}`);
             
+            site.category = h1title; // Zapisanie nazwy kategorii w obiekcie site, aby użyć jej w ETAP 2
             pagesAfterE1.push(site);
             
             udane_e1++;
@@ -217,9 +219,9 @@ async function run() {
 console.log(`\n================ ROZPOCZYNAM ETAP 2 - DODAWANIE WPISU ================\n\n`);
 console.log(`ETAP 2: Załadowano ${pagesAfterE1.length} stron do przetworzenia.\n`);
 
-let i = 0;
+let nr = 0;
 for(const site of pagesAfterE1) {
-    i++;
+    nr++;
     const originUrl = new URL(site.url).origin;
     const context = await browser.newContext();
     const page = await context.newPage();
@@ -228,11 +230,20 @@ for(const site of pagesAfterE1) {
     errorAlert = page.locator('joomla-alert[type="danger"]');
 
     try {
-        console.log(`[ETAP 2]: Dodawanie wpisu na stronie ${originUrl}`);
+        
+// ### AUTORYZACJA
+            console.log(`[ETAP 2]: [${nr}/${sites.length}] Logowanie do panelu: ${originUrl}`);
+
+            // KROK 1: Wejście w link panelu
+            await page.goto(site.url, { waitUntil: 'load' });
+            
+            // KROK 2: Logowanie do panelu
+            await page.getByRole('textbox', { name: 'Użytkownik' }).fill(site.login);
+            await page.getByRole('textbox', { name: 'Hasło' }).fill(site.password);
+            await page.getByRole('button', { name: 'Zaloguj' }).click();
 
 
-
-
+console.log(`[ETAP 2]: Dodawanie wpisu na stronie ${originUrl}`);
 
 
 
@@ -240,17 +251,18 @@ for(const site of pagesAfterE1) {
         console.log(`[ETAP 2]: Dodano wpis. Komunikat: ${await successAlert.first().locator('.alert-message').innerText()}`);
             
            // pagesAfterE1.push(site);
-           pagesAfterE2.push(pagesAfterE1[i-1]);
+           pagesAfterE2.push(site);
             
             udane_e2++;
             fs.appendFileSync('sukces_e2.txt', `${originUrl} - Sukces\n`);
-            console.log(`[ETAP 2]: [${i}/${pagesAfterE1.length}] ETAP 2 ZAKOŃCZONY SUKCESEM: ${originUrl}.\n`);
+            console.log(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] ETAP 2 ZAKOŃCZONY SUKCESEM: ${originUrl}.\n`);
     }
     catch (err: any) {
+        nieudane_e2++;
         const error_reason = err.name === 'TimeoutError' ? 'Przekroczono czas (Timeout serwera)' : err.message.split('\n')[0];
         console.warn(`[ETAP 2]: Błąd podczas dodawania wpisu na: ${originUrl}`);
         fs.appendFileSync('bledy_e2.txt', `${originUrl} - [Etap 2 Wpis]: - ${error_reason}\n`);
-        console.warn(`[ETAP 2]: [${i}/${pagesAfterE1.length}] POMINIĘTO: ${originUrl}.\n`);
+        console.warn(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] POMINIĘTO: ${originUrl}.\n`);
     }
     finally {
         await context.close();
