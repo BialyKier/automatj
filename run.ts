@@ -344,7 +344,7 @@ for(const site of pagesAfterE1) {
                     await page.getByRole('menuitem', { name: 'Narzędzia' }).last().click();
                     await page.getByText('Kod źródłowy').last().click();
                     
-                    const oknoKodu2 = page.getByRole('dialog', { name: 'Kod źródłowy' });
+                    const oknoKodu2 = page.getByRole('dialog', { name: 'Kod źródłowy' }).last();
                     await oknoKodu2.waitFor({ state: 'visible', timeout: timeout });
                     
                     await oknoKodu2.locator('textarea').fill(`<p>${postContent}</p>`);
