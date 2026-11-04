@@ -277,7 +277,7 @@ for(const site of pagesAfterE1) {
             // }
             
             // KROK 4: Wybór Meta - noindex, nofollow
-            const metaDaneButton = page.getByRole('button', { name: 'Meta dane ' });
+            const metaDaneButton = page.getByRole('button', { name: /meta dane/i });
             if(await metaDaneButton.isVisible()){
                 await metaDaneButton.click();
                 const selectNoindex = page.getByLabel('Wyszukiwarki');
@@ -341,8 +341,8 @@ for(const site of pagesAfterE1) {
                     await blokTresc2.waitFor({ state: 'visible', timeout: timeout });
                     await blokTresc2.click();
                     
-                    await page.getByRole('menuitem', { name: 'Narzędzia' }).click();
-                    await page.getByText('Kod źródłowy').click();
+                    await page.getByRole('menuitem', { name: 'Narzędzia' }).last().click();
+                    await page.getByText('Kod źródłowy').last().click();
                     
                     const oknoKodu2 = page.getByRole('dialog', { name: 'Kod źródłowy' });
                     await oknoKodu2.waitFor({ state: 'visible', timeout: timeout });
