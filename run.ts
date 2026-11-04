@@ -308,7 +308,7 @@ for(const site of pagesAfterE1) {
 // Krok 1: Dodawanie nagłówka h1 do treści kategorii blabla
          
                 // const kolumna12 = page.getByText('kolumna -12');
-                const kolumna12Add = page.locator('.btn-grid, button, a').filter({hasText:'kolumna-12'}).first();
+                const kolumna12Add = page.locator('.btn-grid, button, a').filter({hasText: /kolumna\s*-12/i }).first();
                 if((await kolumna12Add.count()) > 0){
                     await kolumna12Add.click();
                     
@@ -330,8 +330,8 @@ for(const site of pagesAfterE1) {
 
 
 
-                    const readmore = page.getByText('Czytaj więcej', { exact: true });
-                    if((await readmore.count()) > 0){
+                    const readmore = page.getByText(/czytaj więcej/i).first();
+                    if(await readmore.isVisible({timeout:3000}).catch(() => false)) {
                         await readmore.click();
                     }
 
