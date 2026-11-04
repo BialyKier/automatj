@@ -309,7 +309,7 @@ for(const site of pagesAfterE1) {
          
                 // const kolumna12 = page.getByText('kolumna -12');
                 const kolumna12Add = page.locator('.btn-grid, button, a').filter({hasText: /kolumna\s*-12/i }).first();
-                if((await kolumna12Add.count()) > 0){
+                if((await kolumna12Add.isVisible({timeout:5000}).catch(() => false))){
                     await kolumna12Add.click();
                     
                     const blokTresc = page.getByText('Treść', {exact: true}).last();
