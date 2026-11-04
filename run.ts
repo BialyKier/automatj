@@ -21,6 +21,8 @@ async function run() {
     const h1TitleSecond = 'Artykuły blogowe';
 
     const postTitle = 'Witaj w blogu!';
+    const excerptText = 'Został on stworzony, żeby przybliżyć niniejszą działalność. ';
+    const postContent = 'Znajdziesz tu różne artykuły przedstawiające oferowane produkty oraz świadczone usługi. Miłej lektury!';
     
     let udane_e1 = 0;
     let nieudane_e1 = 0;
@@ -233,7 +235,7 @@ for(const site of pagesAfterE1) {
 
     try {
         
-// ### AUTORYZACJA
+            // ### AUTORYZACJA
             console.log(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] Logowanie do panelu: ${originUrl}`);
 
             // KROK 1: Wejście w link panelu
@@ -258,24 +260,21 @@ for(const site of pagesAfterE1) {
 
             // KROK 3: Wybór kategorii wpisu
             console.log(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] Wybór alternatywnego układu: ${originUrl}`);
-            const tabOpcje = page.getByRole('tab', { name: 'Opcje' });
             
-          await page.locator('joomla-field-fancy-select').first().click();
-
-          // const opcjaArtykuly = page.getByRole('option', { name: site.category || h1TitleFirst });
-          const opcjaArtykuly = page.getByRole('option', { name: h1TitleSecond, exact: true });
-        const opcjaBlog = page.getByRole('option', { name: h1TitleFirst, exact: true });
-
-        if(await opcjaArtykuly.isVisible({timeout: 2000}).catch(() => false)) {
-            await opcjaArtykuly.click();
-            console.log('[KATEGORIA]: Znaleziono i wybrano Artykuły blogowe');
-        } else {
-            await opcjaBlog.click();
-            console.log('[KATEGORIA]: Nie znaleziono Artykuły blogowe, wybrano Blog');
-        }
-
-         
-
+            await page.locator('joomla-field-fancy-select').first().click();
+            
+            const opcjaArtykuly = page.getByRole('option', { name: h1TitleSecond, exact: true });
+            const opcjaBlog = page.getByRole('option', { name: h1TitleFirst, exact: true });
+            
+            if(await opcjaArtykuly.isVisible({timeout: 2000}).catch(() => false)) {
+                await opcjaArtykuly.click();
+                console.log('[KATEGORIA]: Znaleziono i wybrano Artykuły blogowe');
+            } else {
+                await opcjaBlog.click();
+                console.log('[KATEGORIA]: Nie znaleziono Artykuły blogowe, wybrano Blog');
+            }
+            
+            // KROK 4: Wybór Meta - noindex, nofollow
             const metaDaneButton = page.getByRole('button', { name: 'Meta dane ' });
             if(await metaDaneButton.isVisible()){
                 await metaDaneButton.click();
@@ -290,31 +289,84 @@ for(const site of pagesAfterE1) {
                     }
                 }
             }
-
-
+            
             await page.getByRole('button', { name: 'Zapisz', exact: true }).click();
-                
-                await Promise.race([
-                    successAlert.first().waitFor({ state: 'visible', timeout: timeout }),
-                    errorAlert.first().waitFor({ state: 'visible', timeout: timeout })
-                ]);
-                
-                if(await errorAlert.first().isVisible()) {
+            await Promise.race([
+                successAlert.first().waitFor({ state: 'visible', timeout: timeout }),
+                errorAlert.first().waitFor({ state: 'visible', timeout: timeout })
+            ]);
+            
+            if(await errorAlert.first().isVisible()) {
+                const trescBledy = await errorAlert.first().locator('.alert-message').innerText();
+                throw new Error(`Błąd przy dodawaniu wpisu: ${trescBledy}`);
+            }
+
+
+
+// Krok 1: Dodawanie nagłówka h1 do treści kategorii blabla
+         
+                const kolumna12 = page.getByText('kolumna -12');
+                if((await kolumna12.count()) > 0){
+                    await kolumna12.click();
                     
-                    const trescBledy = await errorAlert.first().locator('.alert-message').innerText();
-                    throw new Error(`Błąd przy dodawaniu wpisu: ${trescBledy}`);
+                    const blokTresc = page.getByText('Treść', {exact: true}).last();
+                    await blokTresc.waitFor({ state: 'visible', timeout: timeout });
+                    await blokTresc.click();
+                    
+                    await page.getByRole('menuitem', { name: 'Narzędzia' }).click();
+                    await page.getByText('Kod źródłowy').click();
+                    
+                    const oknoKodu = page.getByRole('dialog', { name: 'Kod źródłowy' });
+                    await oknoKodu.waitFor({ state: 'visible', timeout: timeout });
+                    
+                    await oknoKodu.locator('textarea').fill(`<p>${excerptText}</p>`);
+                    
+                    await oknoKodu.getByRole('button', { name: 'Zapisz' }).click();
+                    
+                    await oknoKodu.waitFor({ state: 'hidden', timeout: timeout });
                 }
 
+                const readmore = page.getByText('Czytaj więcej', { exact: true });
+                if((await readmore.count()) > 0){
+                    await readmore.click();
+                }
+
+                    const kolumna12_2 = page.getByText('kolumna -12');
+                if((await kolumna12_2.count()) > 0){
+                    await kolumna12_2.click();
+                    
+                    const blokTresc = page.getByText('Treść', {exact: true}).last();
+                    await blokTresc.waitFor({ state: 'visible', timeout: timeout });
+                    await blokTresc.click();
+                    
+                    await page.getByRole('menuitem', { name: 'Narzędzia' }).click();
+                    await page.getByText('Kod źródłowy').click();
+                    
+                    const oknoKodu = page.getByRole('dialog', { name: 'Kod źródłowy' });
+                    await oknoKodu.waitFor({ state: 'visible', timeout: timeout });
+                    
+                    await oknoKodu.locator('textarea').fill(`<p>${postContent}</p>`);
+                    
+                    await oknoKodu.getByRole('button', { name: 'Zapisz' }).click();
+                    
+                    await oknoKodu.waitFor({ state: 'hidden', timeout: timeout });
+                }
+               
 
 
 
 
 
-
-
-
-
-
+await page.getByRole('button', { name: 'Zapisz', exact: true }).click();
+            await Promise.race([
+                successAlert.first().waitFor({ state: 'visible', timeout: timeout }),
+                errorAlert.first().waitFor({ state: 'visible', timeout: timeout })
+            ]);
+            
+            if(await errorAlert.first().isVisible()) {
+                const trescBledy = await errorAlert.first().locator('.alert-message').innerText();
+                throw new Error(`Błąd przy dodawaniu wpisu: ${trescBledy}`);
+            }
 
 
 
