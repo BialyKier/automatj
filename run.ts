@@ -17,8 +17,10 @@ const pagesAfterE2 : SiteRecord[] = [];
 
 async function run() {
 
-    const h1titleFirst = 'Blog';
-    const h1TitleSecond = 'Kategoria testowa nr R';
+    const h1TitleFirst = 'Blog';
+    const h1TitleSecond = 'Artykuły blogowe';
+
+    const postTitle = 'Witaj w blogu!';
     
     let udane_e1 = 0;
     let nieudane_e1 = 0;
@@ -28,8 +30,8 @@ async function run() {
     let successAlert: Locator;
     let errorAlert: Locator;
     
-    const timeout = 30000;
-    const defaulttimeout = 100000;
+    const timeout = 20000;
+    const defaulttimeout = 50000;
     
     // 1. Wczytanie pliku CSV
     const csvData = fs.readFileSync('strony.csv', 'utf-8');
@@ -54,13 +56,13 @@ async function run() {
     
     for (let i = 0; i < sites.length; i++) {
 
-        let h1title = h1titleFirst;
+        let h1Title = h1TitleFirst;
 
         const site = sites[i];
         const nr = i + 1;
         const originUrl = new URL(site.url).origin; // Wyciągamy samą domenę (protokół + host), aby uniknąć problemów z przekierowaniami
         
-        console.log(`[ETAP 1]: [${nr}/${sites.length}] Start: ${originUrl}`);
+        console.log(`[ETAP 1]: [${i+1}/${sites.length}] Start: ${originUrl}`);
         
         // Izolowany kontekst na każdą domenę - czy-ste ciasteczka, brak wycieków pamięci
         const context = await browser.newContext();
@@ -76,7 +78,7 @@ async function run() {
         try {
             
             // ### AUTORYZACJA
-            console.log(`[ETAP 1]: [${nr}/${sites.length}] Logowanie do panelu: ${originUrl}`);
+            console.log(`[ETAP 1]: [${i+1}/${sites.length}] Logowanie do panelu: ${originUrl}`);
 
             // KROK 1: Wejście w link panelu
             await page.goto(site.url, { waitUntil: 'load' });
@@ -90,13 +92,13 @@ async function run() {
             await page.getByRole('textbox', { name: 'Hasło' }).waitFor({ state: 'detached', timeout: timeout });
             
             // ### TWORZENIE KATEGORII
-            console.log(`[ETAP 1]: [${nr}/${sites.length}] Tworzenie kategorii: ${originUrl}`);
+            console.log(`[ETAP 1]: [${i+1}/${sites.length}] Tworzenie kategorii: ${originUrl}`);
 
             // KROK 1: Wejście w link panelu tworzenia kategorii
             await page.goto(`${originUrl}/administrator/index.php?option=com_categories&view=category&layout=edit&extension=com_content`, { waitUntil: 'load' });
 
             // KROK 2: Wpisanie nazwy kategorii
-            await page.getByRole('textbox', { name: 'Tytuł' }).fill(h1title);
+            await page.getByRole('textbox', { name: 'Tytuł' }).fill(h1Title);
 
             // Krok 3: Zapis kategorii, weryfikacja zapisu oraz alternatywna kategoria
             await page.getByRole('button', { name: 'Zapisz', exact: true }).click();
@@ -106,8 +108,8 @@ async function run() {
             ]);
             
             if(await errorAlert.first().isVisible()) {
-                h1title = h1TitleSecond;
-                await page.getByRole('textbox', { name: 'Tytuł' }).fill(h1title);
+                h1Title = h1TitleSecond;
+                await page.getByRole('textbox', { name: 'Tytuł' }).fill(h1Title);
                 if(await page.getByRole('textbox', { name: 'Alias' }).isVisible()) {
                     await page.getByRole('textbox', { name: 'Alias' }).fill('');
                 }
@@ -126,11 +128,11 @@ async function run() {
                 }
             }
             
-            console.log(`[ETAP 1]: Dodano kategorię. Komunikat: ${await successAlert.first().locator('.alert-message').innerText()}`);
+            console.log(`[ETAP 1]: [${i+1}/${sites.length}] Dodano kategorię. Komunikat: ${await successAlert.first().locator('.alert-message').innerText()}`);
             
             // ### MODYFIKACJA KATEGORII
-            console.log(`[ETAP 1]: [${nr}/${sites.length}] Modyfikacja kategorii: ${originUrl}`);
-            console.log(`[ETAP 1]: [${nr}/${sites.length}] Dodawanie nagłówka <h1>: ${originUrl}`);
+            console.log(`[ETAP 1]: [${i+1}/${sites.length}] Modyfikacja kategorii: ${originUrl}`);
+            console.log(`[ETAP 1]: [${i+1}/${sites.length}] Dodawanie nagłówka <h1>: ${originUrl}`);
             // Krok 1: Dodawanie nagłówka h1 do treści kategorii
             const tabKategoria = page.getByRole('tab', { name: 'Kategoria' });
             if(await tabKategoria.isVisible()) {
@@ -149,19 +151,19 @@ async function run() {
                     const oknoKodu = page.getByRole('dialog', { name: 'Kod źródłowy' });
                     await oknoKodu.waitFor({ state: 'visible', timeout: timeout });
                     
-                    await oknoKodu.locator('textarea').fill(`<h1>${h1title}</h1>`);
+                    await oknoKodu.locator('textarea').fill(`<h1>${h1Title}</h1>`);
                     
                     await oknoKodu.getByRole('button', { name: 'Zapisz' }).click();
                     
                     await oknoKodu.waitFor({ state: 'hidden', timeout: timeout });
                     
-                    console.log(`[ETAP 1]: Dodano nagłówek <h1> do kategorii`);
+                    console.log(`[ETAP 1]: [${i+1}/${sites.length}] Dodano nagłówek <h1> do kategorii`);
                 
                 }
             }
 
             // Krok 2: Wybór Layout2 jeśli jest dostępny w szablonie. Jeśli nie ma, po prostu kontynuuj
-            console.log(`[ETAP 1]: [${nr}/${sites.length}] Wybór alternatywnego układu: ${originUrl}`);
+            console.log(`[ETAP 1]: [${i+1}/${sites.length}] Wybór alternatywnego układu: ${originUrl}`);
             const tabOpcje = page.getByRole('tab', { name: 'Opcje' });
             
             if(await tabOpcje.isVisible()) {
@@ -172,9 +174,9 @@ async function run() {
                     
                     if(maOpcje) {
                         await selectUklad.selectOption('site:layout2');
-                        console.log(`[ETAP 1]: Zmieniono alternatywny układ na "site:layout2"`);
+                        console.log(`[ETAP 1]: [${i+1}/${sites.length}] Zmieniono alternatywny układ na "site:layout2"`);
                     } else {
-                        console.log(`[ETAP 1]: Opcja "site:layout2" nie jest dostępna w tym szablonie, pomijanie zmiany układu`);
+                        console.log(`[ETAP 1]: [${i+1}/${sites.length}] Opcja "site:layout2" nie jest dostępna w tym szablonie, pomijanie zmiany układu`);
                     }
                 }
             }
@@ -191,9 +193,9 @@ async function run() {
                 throw new Error(`Błąd przy dodawaniu kategorii: ${trescBledy}`);
             }
             
-            console.log(`[ETAP 1]: Ustawiono Layout2 oraz dodano <h1>${h1title}</h1>. Komunikat: ${await successAlert.first().locator('.alert-message').innerText()}`);
+            console.log(`[ETAP 1]: [${i+1}/${sites.length}] Ustawiono Layout2 oraz dodano <h1>${h1Title}</h1>. Komunikat: ${await successAlert.first().locator('.alert-message').innerText()}`);
             
-            site.category = h1title; // Zapisanie nazwy kategorii w obiekcie site, aby użyć jej w ETAP 2
+            site.category = h1Title; // Zapisanie nazwy kategorii w obiekcie site, aby użyć jej w ETAP 2
             pagesAfterE1.push(site);
             
             udane_e1++;
@@ -203,7 +205,7 @@ async function run() {
         } catch (err: any) {
             nieudane_e1++;
             const error_reason = err.name === 'TimeoutError' ? 'Przekroczono czas (Timeout serwera)' : err.message.split('\n')[0];
-            console.warn(`[ETAP 1]: Pomijam stronę. Powód: ${error_reason}`);
+            console.warn(`[ETAP 1]: [${i+1}/${sites.length}] Pomijam stronę. Powód: ${error_reason}`);
             fs.appendFileSync('bledy_e1.txt', `${originUrl} [Etap 1 Kategoria]: ${error_reason}\n`);
             console.warn(`[ETAP 1]: [${i+1}/${sites.length}] POMINIĘTO: ${originUrl}.\n`);
         } finally {
@@ -225,7 +227,7 @@ for(const site of pagesAfterE1) {
     const originUrl = new URL(site.url).origin;
     const context = await browser.newContext();
     const page = await context.newPage();
-    page.setDefaultTimeout(15000);
+    page.setDefaultTimeout(10000);
     successAlert = page.locator('joomla-alert[type="success"]');
     errorAlert = page.locator('joomla-alert[type="danger"]');
 
@@ -244,14 +246,80 @@ for(const site of pagesAfterE1) {
 
             // KROK 3: Weryfikacja logowania 
             await page.getByRole('textbox', { name: 'Hasło' }).waitFor({ state: 'detached', timeout: timeout });
+            
+            // ### TWORZENIE WPISU
+            console.log(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] Tworzenie wpisu: ${originUrl}`);
+
+            // KROK 1: Wejście w link panelu tworzenia kategorii
+            await page.goto(`${originUrl}/administrator/index.php?option=com_content&view=article&layout=edit`, { waitUntil: 'load' });
+
+            // KROK 2: Wpisanie tytułu wpisu
+            await page.getByRole('textbox', { name: 'Tytuł' }).fill(postTitle);
+
+            // KROK 3: Wybór kategorii wpisu
+            console.log(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] Wybór alternatywnego układu: ${originUrl}`);
+            const tabOpcje = page.getByRole('tab', { name: 'Opcje' });
+            
+          await page.locator('joomla-field-fancy-select').first().click();
+
+          // const opcjaArtykuly = page.getByRole('option', { name: site.category || h1TitleFirst });
+          const opcjaArtykuly = page.getByRole('option', { name: h1TitleSecond, exact: true });
+        const opcjaBlog = page.getByRole('option', { name: h1TitleFirst, exact: true });
+
+        if(await opcjaArtykuly.isVisible({timeout: 2000}).catch(() => false)) {
+            await opcjaArtykuly.click();
+            console.log('[KATEGORIA]: Znaleziono i wybrano Artykuły blogowe');
+        } else {
+            await opcjaBlog.click();
+            console.log('[KATEGORIA]: Nie znaleziono Artykuły blogowe, wybrano Blog');
+        }
+
+         
+
+            const metaDaneButton = page.getByRole('button', { name: 'Meta dane ' });
+            if(await metaDaneButton.isVisible()){
+                await metaDaneButton.click();
+                const selectNoindex = page.getByLabel('Wyszukiwarki');
+                if( await selectNoindex.isVisible()) {
+                    const noIndexOption = (await selectNoindex.locator('option[value="noindex, nofollow"]').count()) > 0;
+                    if(noIndexOption) {
+                        await selectNoindex.selectOption('noindex, nofollow');
+                        console.log(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] Ustawiono meta tag "noindex, nofollow"`);
+                    } else {
+                        console.log(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] Opcja "noindex, nofollow" nie jest dostępna w tym szablonie, pomijanie zmiany meta tagu`);
+                    }
+                }
+            }
 
 
-console.log(`[ETAP 2]: Dodawanie wpisu na stronie ${originUrl}`);
+            await page.getByRole('button', { name: 'Zapisz', exact: true }).click();
+                
+                await Promise.race([
+                    successAlert.first().waitFor({ state: 'visible', timeout: timeout }),
+                    errorAlert.first().waitFor({ state: 'visible', timeout: timeout })
+                ]);
+                
+                if(await errorAlert.first().isVisible()) {
+                    
+                    const trescBledy = await errorAlert.first().locator('.alert-message').innerText();
+                    throw new Error(`Błąd przy dodawaniu wpisu: ${trescBledy}`);
+                }
 
 
 
 
-        console.log(`[ETAP 2]: Dodano wpis. Komunikat: ${await successAlert.first().locator('.alert-message').innerText()}`);
+
+
+
+
+
+
+
+
+
+
+
+       // console.log(`[ETAP 2]: Dodano wpis. Komunikat: ${await successAlert.first().locator('.alert-message').innerText()}`);
             
            // pagesAfterE1.push(site);
            pagesAfterE2.push(site);
@@ -282,7 +350,7 @@ console.log(`[ETAP 2]: Dodawanie wpisu na stronie ${originUrl}`);
 
 
 
-// ################################################################################################################################################################################
+// ##################################################################################################################################
 
   await browser.close();
 
