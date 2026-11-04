@@ -191,20 +191,20 @@ async function run() {
                 throw new Error(`Błąd przy dodawaniu kategorii: ${trescBledy}`);
             }
             
-            console.log(`[ETAP 1]: Ustawiono Layout2 oraz dodano <h1>Blog</h1>. Komunikat: ${await successAlert.first().locator('.alert-message').innerText()}`);
+            console.log(`[ETAP 1]: Ustawiono Layout2 oraz dodano <h1>${h1title}</h1>. Komunikat: ${await successAlert.first().locator('.alert-message').innerText()}`);
             
             site.category = h1title; // Zapisanie nazwy kategorii w obiekcie site, aby użyć jej w ETAP 2
             pagesAfterE1.push(site);
             
             udane_e1++;
-            fs.appendFileSync('sukces_e1.txt', `${originUrl} - Sukces\n`);
+            fs.appendFileSync('sukces_e1.txt', `${originUrl} Sukces\n`);
             console.log(`[ETAP 1]: [${i+1}/${sites.length}] ETAP 1 ZAKOŃCZONY SUKCESEM: ${originUrl}.\n`);
         
         } catch (err: any) {
             nieudane_e1++;
             const error_reason = err.name === 'TimeoutError' ? 'Przekroczono czas (Timeout serwera)' : err.message.split('\n')[0];
             console.warn(`[ETAP 1]: Pomijam stronę. Powód: ${error_reason}`);
-            fs.appendFileSync('bledy_e1.txt', `${originUrl} - [Etap 1 Kategoria]: - ${error_reason}\n`);
+            fs.appendFileSync('bledy_e1.txt', `${originUrl} [Etap 1 Kategoria]: ${error_reason}\n`);
             console.warn(`[ETAP 1]: [${i+1}/${sites.length}] POMINIĘTO: ${originUrl}.\n`);
         } finally {
             await context.close();
@@ -225,14 +225,14 @@ for(const site of pagesAfterE1) {
     const originUrl = new URL(site.url).origin;
     const context = await browser.newContext();
     const page = await context.newPage();
-    page.setDefaultTimeout(defaulttimeout);
+    page.setDefaultTimeout(15000);
     successAlert = page.locator('joomla-alert[type="success"]');
     errorAlert = page.locator('joomla-alert[type="danger"]');
 
     try {
         
 // ### AUTORYZACJA
-            console.log(`[ETAP 2]: [${nr}/${sites.length}] Logowanie do panelu: ${originUrl}`);
+            console.log(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] Logowanie do panelu: ${originUrl}`);
 
             // KROK 1: Wejście w link panelu
             await page.goto(site.url, { waitUntil: 'load' });
@@ -241,6 +241,9 @@ for(const site of pagesAfterE1) {
             await page.getByRole('textbox', { name: 'Użytkownik' }).fill(site.login);
             await page.getByRole('textbox', { name: 'Hasło' }).fill(site.password);
             await page.getByRole('button', { name: 'Zaloguj' }).click();
+
+            // KROK 3: Weryfikacja logowania 
+            await page.getByRole('textbox', { name: 'Hasło' }).waitFor({ state: 'detached', timeout: timeout });
 
 
 console.log(`[ETAP 2]: Dodawanie wpisu na stronie ${originUrl}`);
@@ -254,14 +257,14 @@ console.log(`[ETAP 2]: Dodawanie wpisu na stronie ${originUrl}`);
            pagesAfterE2.push(site);
             
             udane_e2++;
-            fs.appendFileSync('sukces_e2.txt', `${originUrl} - Sukces\n`);
+            fs.appendFileSync('sukces_e2.txt', `${originUrl} Sukces\n`);
             console.log(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] ETAP 2 ZAKOŃCZONY SUKCESEM: ${originUrl}.\n`);
     }
     catch (err: any) {
         nieudane_e2++;
         const error_reason = err.name === 'TimeoutError' ? 'Przekroczono czas (Timeout serwera)' : err.message.split('\n')[0];
         console.warn(`[ETAP 2]: Błąd podczas dodawania wpisu na: ${originUrl}`);
-        fs.appendFileSync('bledy_e2.txt', `${originUrl} - [Etap 2 Wpis]: - ${error_reason}\n`);
+        fs.appendFileSync('bledy_e2.txt', `${originUrl} [Etap 2 Wpis]: ${error_reason}\n`);
         console.warn(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] POMINIĘTO: ${originUrl}.\n`);
     }
     finally {
@@ -293,7 +296,7 @@ console.log(`[ETAP 2]: Dodawanie wpisu na stronie ${originUrl}`);
   console.log(`[Etap 2]: Wszystkich stron: ${pagesAfterE1.length}`);
   console.log(`[Etap 2]: Zakończone sukcesem: ${udane_e2}`);
   console.log(`[Etap 2]: Pominięte z błędami: ${nieudane_e2}`);
-  console.log(`[Etap 2]: Szczegóły zapisano w plikach sukces_e1.txt oraz bledy_e1.txt`);
+  console.log(`[Etap 2]: Szczegóły zapisano w plikach sukces_e2.txt oraz bledy_e2.txt`);
   console.log('\n==============================================\n');
 }
 
