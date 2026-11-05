@@ -91,7 +91,10 @@ async function run() {
                 await page.goto(site.url, { waitUntil: 'load' });
 
                 console.log(`[ETAP 1.1]: [${i+1}/${sites.length}] Sukces`);
-            } catch (mediaErr: any) {console.warn(`[ETAP 1.1]: [${i+1}/${sites.length}] Krok 1.1: ${mediaErr.message.split('\n')[0]} - Błąd`);}
+            } catch (mediaErr: any) {
+                console.warn(`[ETAP 1.1]: [${i+1}/${sites.length}] Krok 1.1: ${mediaErr.message.split('\n')[0]} - Błąd`);
+                throw new Error(`[ETAP 1.1] Error`);
+            }
             
             try{// KROK 1.2: Logowanie do panelu CMS
                 console.log(`[ETAP 1.2]: [${i+1}/${sites.length}] Logowanie do panelu CMS`);
@@ -101,7 +104,10 @@ async function run() {
                 await page.getByRole('button', { name: 'Zaloguj' }).click();
 
                 console.log(`[ETAP 1.2]: [${i+1}/${sites.length}] Sukces`);
-            } catch (mediaErr: any) {console.warn(`[ETAP 1.2]: [${i+1}/${sites.length}] Krok 1.2: ${mediaErr.message.split('\n')[0]} - Błąd`);}
+            } catch (mediaErr: any) {
+                console.warn(`[ETAP 1.2]: [${i+1}/${sites.length}] Krok 1.2: ${mediaErr.message.split('\n')[0]} - Błąd`);
+                throw new Error(`[ETAP 1.2] Error`);
+            }
             
             try{// KROK 1.3: Weryfikacja logowania
                 console.log(`[ETAP 1.3]: [${i+1}/${sites.length}] Weryfikacja logowania`);
@@ -109,7 +115,10 @@ async function run() {
                 await page.getByRole('textbox', { name: 'Hasło' }).waitFor({ state: 'detached', timeout: timeout });
 
                 console.log(`[ETAP 1.3]: [${i+1}/${sites.length}] Sukces`);
-            } catch (mediaErr: any) {console.warn(`[ETAP 1.3]: [${i+1}/${sites.length}] Krok 1.3: ${mediaErr.message.split('\n')[0]} - Błąd`);} 
+            } catch (mediaErr: any) {
+                console.warn(`[ETAP 1.3]: [${i+1}/${sites.length}] Krok 1.3: ${mediaErr.message.split('\n')[0]} - Błąd`);
+                throw new Error(`[ETAP 1.3] Error`);
+            } 
             
             // ### TWORZENIE KATEGORII
         
@@ -119,7 +128,10 @@ async function run() {
                 await page.goto(`${originUrl}/administrator/index.php?option=com_categories&view=category&layout=edit&extension=com_content`, { waitUntil: 'load' });
 
                 console.log(`[ETAP 1.4]: [${i+1}/${sites.length}] Sukces`);
-            } catch (mediaErr: any) {console.warn(`[ETAP 1.4]: [${i+1}/${sites.length}] Krok 1.4: ${mediaErr.message.split('\n')[0]} - Błąd`);}
+            } catch (mediaErr: any) {
+                console.warn(`[ETAP 1.4]: [${i+1}/${sites.length}] Krok 1.4: ${mediaErr.message.split('\n')[0]} - Błąd`);
+                throw new Error(`[ETAP 1.4] Error`);
+            }
 
 
             try{// KROK 1.5: Wpisanie nazwy kategorii
@@ -128,7 +140,10 @@ async function run() {
                 await page.getByRole('textbox', { name: 'Tytuł' }).fill(h1Title);
 
                 console.log(`[ETAP 1.5]: [${i+1}/${sites.length}] Sukces`);
-            } catch (mediaErr: any) {console.warn(`[ETAP 1.5]: [${i+1}/${sites.length}] Krok 1.5: ${mediaErr.message.split('\n')[0]} - Błąd`);}
+            } catch (mediaErr: any) {
+                console.warn(`[ETAP 1.5]: [${i+1}/${sites.length}] Krok 1.5: ${mediaErr.message.split('\n')[0]} - Błąd`);
+                throw new Error(`[ETAP 1.5] Error`);
+            }
 
 
             try{// Krok 1.6: Zapis kategorii, weryfikacja zapisu oraz alternatywna kategoria
@@ -162,7 +177,10 @@ async function run() {
             }
             
             console.log(`[ETAP 1.6]: [${i+1}/${sites.length}] Sukces`);
-            } catch (mediaErr: any) {console.warn(`[ETAP 1.6]: [${i+1}/${sites.length}] Krok 1.6: ${mediaErr.message.split('\n')[0]} - Błąd`);}
+            } catch (mediaErr: any) {
+                console.warn(`[ETAP 1.6]: [${i+1}/${sites.length}] Krok 1.6: ${mediaErr.message.split('\n')[0]} - Błąd`);
+                throw new Error(`[ETAP 1.6] Error`);
+            }
             
             // ### MODYFIKACJA KATEGORII
 
@@ -198,7 +216,10 @@ async function run() {
             }
 
             console.log(`[ETAP 1.7]: [${i+1}/${sites.length}] Sukces`);
-            } catch (mediaErr: any) {console.warn(`[ETAP 1.7]: [${i+1}/${sites.length}] Krok 1.7: ${mediaErr.message.split('\n')[0]} - Błąd`);}
+            } catch (mediaErr: any) {
+                console.warn(`[ETAP 1.7]: [${i+1}/${sites.length}] Krok 1.7: ${mediaErr.message.split('\n')[0]} - Błąd`);
+                throw new Error(`[ETAP 1.7] Error`);
+            }
 
             try{// Krok 1.8: Wybór Layout2 jeśli jest dostępny w szablonie. Jeśli nie ma, po prostu kontynuuj
             console.log(`[ETAP 1.8]: [${i+1}/${sites.length}] Wybór alternatywnego układu`);
@@ -233,7 +254,10 @@ async function run() {
             }
             
             console.log(`[ETAP 1.8]: [${i+1}/${sites.length}] Sukces`);
-            } catch (mediaErr: any) {console.warn(`[ETAP 1.8]: [${i+1}/${sites.length}] Krok 1.8: ${mediaErr.message.split('\n')[0]} - Błąd`);}
+            } catch (mediaErr: any) {
+                console.warn(`[ETAP 1.8]: [${i+1}/${sites.length}] Krok 1.8: ${mediaErr.message.split('\n')[0]} - Błąd`);
+                throw new Error(`[ETAP 1.8] Error`);
+            }
             
             site.category = h1Title; // Zapisanie nazwy kategorii w obiekcie site, aby użyć jej w ETAP 2
             pagesAfterE1.push(site);
@@ -280,7 +304,10 @@ for(const site of pagesAfterE1) {
                 await page.goto(site.url, { waitUntil: 'load' });
                 
                 console.log(`[ETAP 2.1]: [${nr}/${pagesAfterE1.length}] Sukces`);
-            } catch (mediaErr: any) { console.warn(`[ETAP 2.1]: [${nr}/${pagesAfterE1.length}] Krok 2.1: ${mediaErr.message.split('\n')[0]} - Błąd`);}
+            } catch (mediaErr: any) {
+                console.warn(`[ETAP 2.1]: [${nr}/${pagesAfterE1.length}] Krok 2.1: ${mediaErr.message.split('\n')[0]} - Błąd`);
+                throw new Error(`[ETAP 2.1] Error`);
+            }
 
             try{// KROK 2.2: Logowanie do panelu CMS
                 console.log(`[ETAP 2.2]: [${nr}/${pagesAfterE1.length}] Logowanie do panelu CMS`);
@@ -290,7 +317,10 @@ for(const site of pagesAfterE1) {
                 await page.getByRole('button', { name: 'Zaloguj' }).click();
 
                 console.log(`[ETAP 2.2]: [${nr}/${pagesAfterE1.length}] Sukces`);
-            } catch (mediaErr: any) { console.warn(`[ETAP 2.2]: [${nr}/${pagesAfterE1.length}] Krok 2.2: ${mediaErr.message.split('\n')[0]} - Błąd`);}
+            } catch (mediaErr: any) {
+                console.warn(`[ETAP 2.2]: [${nr}/${pagesAfterE1.length}] Krok 2.2: ${mediaErr.message.split('\n')[0]} - Błąd`);
+                throw new Error(`[ETAP 2.2] Error`);
+            }
 
             try{// KROK 2.3: Weryfikacja logowania
                 console.log(`[ETAP 2.3]: [${nr}/${pagesAfterE1.length}] Weryfikacja logowania`);
@@ -298,7 +328,10 @@ for(const site of pagesAfterE1) {
                 await page.getByRole('textbox', { name: 'Hasło' }).waitFor({ state: 'detached', timeout: timeout });
 
                 console.log(`[ETAP 2.3]: [${nr}/${pagesAfterE1.length}] Sukces`);
-            } catch (mediaErr: any) { console.warn(`[ETAP 2.3]: [${nr}/${pagesAfterE1.length}] Krok 2.3: ${mediaErr.message.split('\n')[0]} - Błąd`);}
+            } catch (mediaErr: any) {
+                console.warn(`[ETAP 2.3]: [${nr}/${pagesAfterE1.length}] Krok 2.3: ${mediaErr.message.split('\n')[0]} - Błąd`);
+                throw new Error(`[ETAP 2.3] Error`);
+            }
             
             // ### TWORZENIE NOWEGO WPISU
             console.log(`[ETAP 2.4]: [${nr}/${pagesAfterE1.length}] Tworzenie nowego wpisu: ${originUrl}`);
@@ -309,7 +342,10 @@ for(const site of pagesAfterE1) {
                 await page.goto(`${originUrl}/administrator/index.php?option=com_content&view=article&layout=edit`, { waitUntil: 'load' });
 
                 console.log(`[ETAP 2.4]: [${nr}/${pagesAfterE1.length}] Sukces`);
-            } catch (mediaErr: any) { console.warn(`[ETAP 2.4]: [${nr}/${pagesAfterE1.length}] Krok 2.4: ${mediaErr.message.split('\n')[0]} - Błąd`);}
+            } catch (mediaErr: any) {
+                console.warn(`[ETAP 2.4]: [${nr}/${pagesAfterE1.length}] Krok 2.4: ${mediaErr.message.split('\n')[0]} - Błąd`);
+                throw new Error(`[ETAP 2.4] Error`);
+            }
 
             try{// KROK 2.5: Wpisanie tytułu wpisu
                 console.log(`[ETAP 2.5]: [${nr}/${pagesAfterE1.length}] Wpisanie tytułu wpisu`);
@@ -317,7 +353,10 @@ for(const site of pagesAfterE1) {
                 await page.getByRole('textbox', { name: 'Tytuł' }).fill(postTitle);
 
                 console.log(`[ETAP 2.5]: [${nr}/${pagesAfterE1.length}] Sukces`);
-            } catch (mediaErr: any) { console.warn(`[ETAP 2.5]: [${nr}/${pagesAfterE1.length}] Krok 2.5: ${mediaErr.message.split('\n')[0]} - Błąd`);}
+            } catch (mediaErr: any) {
+                console.warn(`[ETAP 2.5]: [${nr}/${pagesAfterE1.length}] Krok 2.5: ${mediaErr.message.split('\n')[0]} - Błąd`);
+                throw new Error(`[ETAP 2.5] Error`);
+            }
  
             try{// KROK 2.6: Wybór kategorii wpisu: ${site.category}
                 console.log(`[ETAP 2.6]: [${nr}/${pagesAfterE1.length}] Wybór kategorii wpisu: ${site.category}`);
@@ -326,7 +365,10 @@ for(const site of pagesAfterE1) {
                 await page.getByRole('option', { name: site.category, exact: true }).click();
 
                 console.log(`[ETAP 2.6]: [${nr}/${pagesAfterE1.length}] Sukces`);
-            } catch (mediaErr: any) { console.warn(`[ETAP 2.6]: [${nr}/${pagesAfterE1.length}] Krok 2.6: ${mediaErr.message.split('\n')[0]} - Błąd`);}
+            } catch (mediaErr: any) {
+                console.warn(`[ETAP 2.6]: [${nr}/${pagesAfterE1.length}] Krok 2.6: ${mediaErr.message.split('\n')[0]} - Błąd`);
+                throw new Error(`[ETAP 2.6] Error`);
+            }
 
             try{// KROK 2.7 Ustawienie SEO robots - noindex, nofollow
                 console.log(`[ETAP 2.7]: [${nr}/${pagesAfterE1.length}] Ustawienie SEO robots - noindex, nofollow`);
@@ -339,7 +381,10 @@ for(const site of pagesAfterE1) {
                 await selectRobots.dispatchEvent('change');
 
                 console.log(`[ETAP 2.7]: [${nr}/${pagesAfterE1.length}] Sukces`);
-            } catch (mediaErr: any) { console.warn(`[ETAP 2.7]: [${nr}/${pagesAfterE1.length}] Krok 2.7: ${mediaErr.message.split('\n')[0]} - Błąd`);}
+            } catch (mediaErr: any) {
+                console.warn(`[ETAP 2.7]: [${nr}/${pagesAfterE1.length}] Krok 2.7: ${mediaErr.message.split('\n')[0]} - Błąd`)
+                throw new Error(`[ETAP 2.7] Error`);
+            }
 
             
             try{// KROK 2.8: Dodanie treści wpisu - zajawka, czytaj więcej, treść
@@ -390,7 +435,10 @@ for(const site of pagesAfterE1) {
                 }
 
                 console.log(`[ETAP 2.8]: [${nr}/${pagesAfterE1.length}] Sukces`);
-            } catch (mediaErr: any) {console.warn(`[ETAP 2.8]: [${nr}/${pagesAfterE1.length}] Krok 2.8: ${mediaErr.message.split('\n')[0]} - Błąd`);}
+            } catch (mediaErr: any) {
+                console.warn(`[ETAP 2.8]: [${nr}/${pagesAfterE1.length}] Krok 2.8: ${mediaErr.message.split('\n')[0]} - Błąd`);
+                throw new Error(`[ETAP 2.8] Error`);
+            }
             
             
             try{// KROK 2.9: Dodanie treści wpisu - obraz
@@ -448,7 +496,10 @@ for(const site of pagesAfterE1) {
                     await page.getByRole('dialog').getByRole('button', { name: 'Wybierz' }).click();
 
                     console.log(`[ETAP 2.9]: [${nr}/${pagesAfterE1.length}] Sukces`);
-                } catch (mediaErr: any) {console.warn(`[ETAP 2.9]: [${nr}/${pagesAfterE1.length}] Krok 2.9: ${mediaErr.message.split('\n')[0]} - Błąd`);}
+                } catch (mediaErr: any) {
+                    console.warn(`[ETAP 2.9]: [${nr}/${pagesAfterE1.length}] Krok 2.9: ${mediaErr.message.split('\n')[0]} - Błąd`);
+                    throw new Error(`[ETAP 2.9] Error`);
+                }
 
             
             // await page.getByRole('button', { name: 'Zapisz', exact: true }).click();
