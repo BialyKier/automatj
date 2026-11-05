@@ -68,7 +68,7 @@ async function run() {
         const nr = i + 1;
         const originUrl = new URL(site.url).origin; // Wyciągamy samą domenę (protokół + host), aby uniknąć problemów z przekierowaniami
         
-        console.log(`[ETAP 1]: [${i+1}/${sites.length}] Start: ${originUrl}`);
+        console.log(`[ETAP 1.0]: [${i+1}/${sites.length}] Start: ${originUrl}`);
         
         // Izolowany kontekst na każdą domenę - czy-ste ciasteczka, brak wycieków pamięci
         const context = await browser.newContext();
@@ -88,7 +88,7 @@ async function run() {
 
                 await page.goto(site.url, { waitUntil: 'load' });
 
-                console.log(`[ETAP 1.1]: [${i+1}/${pagesAfterE1.length}] Sukces`);
+                console.log(`[ETAP 1.1]: [${i+1}/${sites.length}] Sukces`);
             } catch (mediaErr: any) {console.warn(`[ETAP 1.1]: [${i+1}/${sites.length}] Krok 1.1: ${mediaErr.message.split('\n')[0]} - Błąd`);}
             
             try{// KROK 1.2: Logowanie do panelu CMS
@@ -98,7 +98,7 @@ async function run() {
                 await page.getByRole('textbox', { name: 'Hasło' }).fill(site.password);
                 await page.getByRole('button', { name: 'Zaloguj' }).click();
 
-                console.log(`[ETAP 1.2]: [${i+1}/${pagesAfterE1.length}] Sukces`);
+                console.log(`[ETAP 1.2]: [${i+1}/${sites.length}] Sukces`);
             } catch (mediaErr: any) {console.warn(`[ETAP 1.2]: [${i+1}/${sites.length}] Krok 1.2: ${mediaErr.message.split('\n')[0]} - Błąd`);}
             
             try{// KROK 1.3: Weryfikacja logowania
@@ -106,7 +106,7 @@ async function run() {
 
                 await page.getByRole('textbox', { name: 'Hasło' }).waitFor({ state: 'detached', timeout: timeout });
 
-                console.log(`[ETAP 1.3]: [$i+1}/${pagesAfterE1.length}] Sukces`);
+                console.log(`[ETAP 1.3]: [${i+1}/${sites.length}] Sukces`);
             } catch (mediaErr: any) {console.warn(`[ETAP 1.3]: [${i+1}/${sites.length}] Krok 1.3: ${mediaErr.message.split('\n')[0]} - Błąd`);} 
             
             // ### TWORZENIE KATEGORII
@@ -116,7 +116,7 @@ async function run() {
                 
                 await page.goto(`${originUrl}/administrator/index.php?option=com_categories&view=category&layout=edit&extension=com_content`, { waitUntil: 'load' });
 
-                console.log(`[ETAP 1.4]: [${i+1}/${pagesAfterE1.length}] Sukces`);
+                console.log(`[ETAP 1.4]: [${i+1}/${sites.length}] Sukces`);
             } catch (mediaErr: any) {console.warn(`[ETAP 1.4]: [${i+1}/${sites.length}] Krok 1.4: ${mediaErr.message.split('\n')[0]} - Błąd`);}
 
 
@@ -125,12 +125,12 @@ async function run() {
                 
                 await page.getByRole('textbox', { name: 'Tytuł' }).fill(h1Title);
 
-                console.log(`[ETAP 1.5]: [${i+1}/${pagesAfterE1.length}] Sukces`);
+                console.log(`[ETAP 1.5]: [${i+1}/${sites.length}] Sukces`);
             } catch (mediaErr: any) {console.warn(`[ETAP 1.5]: [${i+1}/${sites.length}] Krok 1.5: ${mediaErr.message.split('\n')[0]} - Błąd`);}
 
 
             try{// Krok 1.6: Zapis kategorii, weryfikacja zapisu oraz alternatywna kategoria
-            console.log(`[ETAP 1.5]: [${i+1}/${sites.length}] Tworzenie kategorii alternatywnej`);
+            console.log(`[ETAP 1.6]: [${i+1}/${sites.length}] Tworzenie kategorii alternatywnej`);
 
             await page.getByRole('button', { name: 'Zapisz', exact: true }).click();
             await Promise.race([
@@ -155,11 +155,11 @@ async function run() {
                 if(await errorAlert.first().isVisible()) {
                     
                     const trescBledy = await errorAlert.first().locator('.alert-message').innerText();
-                    throw new Error(`Błąd przy dodawaniu kategorii: ${trescBledy}`);
+                    throw new Error(`[ETAP 1.6]: Błąd przy dodawaniu kategorii: ${trescBledy}`);
                 }
             }
             
-            console.log(`[ETAP 1.1]: [${i+1}/${pagesAfterE1.length}] Sukces`);
+            console.log(`[ETAP 1.6]: [${i+1}/${sites.length}] Sukces`);
             } catch (mediaErr: any) {console.warn(`[ETAP 1.6]: [${i+1}/${sites.length}] Krok 1.6: ${mediaErr.message.split('\n')[0]} - Błąd`);}
             
             // ### MODYFIKACJA KATEGORII
@@ -190,12 +190,12 @@ async function run() {
                     
                     await oknoKodu.waitFor({ state: 'hidden', timeout: timeout });
                     
-                    console.log(`[ETAP 1]: [${i+1}/${sites.length}] Dodano nagłówek <h1> do kategorii`);
+                    console.log(`[ETAP 1.7]: [${i+1}/${sites.length}] Dodano nagłówek <h1> do kategorii`);
                 
                 }
             }
 
-            console.log(`[ETAP 1.7]: [${i+1}/${pagesAfterE1.length}] Sukces`);
+            console.log(`[ETAP 1.7]: [${i+1}/${sites.length}] Sukces`);
             } catch (mediaErr: any) {console.warn(`[ETAP 1.7]: [${i+1}/${sites.length}] Krok 1.7: ${mediaErr.message.split('\n')[0]} - Błąd`);}
 
             try{// Krok 1.8: Wybór Layout2 jeśli jest dostępny w szablonie. Jeśli nie ma, po prostu kontynuuj
@@ -211,9 +211,9 @@ async function run() {
                     
                     if(maOpcje) {
                         await selectUklad.selectOption('site:layout2');
-                        console.log(`[ETAP 1]: [${i+1}/${sites.length}] Zmieniono alternatywny układ na "site:layout2"`);
+                        console.log(`[ETAP 1.8]: [${i+1}/${sites.length}] Zmieniono alternatywny układ na "site:layout2"`);
                     } else {
-                        console.log(`[ETAP 1]: [${i+1}/${sites.length}] Opcja "site:layout2" nie jest dostępna w tym szablonie, pomijanie zmiany układu`);
+                        console.log(`[ETAP 1.8]: [${i+1}/${sites.length}] Opcja "site:layout2" nie jest dostępna w tym szablonie, pomijanie zmiany układu`);
                     }
                 }
             }
@@ -230,7 +230,7 @@ async function run() {
                 throw new Error(`Błąd przy dodawaniu kategorii: ${trescBledy}`);
             }
             
-            console.log(`[ETAP 1.8]: [${i+1}/${pagesAfterE1.length}] Sukces`);
+            console.log(`[ETAP 1.8]: [${i+1}/${sites.length}] Sukces`);
             } catch (mediaErr: any) {console.warn(`[ETAP 1.8]: [${i+1}/${sites.length}] Krok 1.8: ${mediaErr.message.split('\n')[0]} - Błąd`);}
             
             site.category = h1Title; // Zapisanie nazwy kategorii w obiekcie site, aby użyć jej w ETAP 2
@@ -243,9 +243,9 @@ async function run() {
         } catch (err: any) {
             nieudane_e1++;
             const error_reason = err.name === 'TimeoutError' ? 'Przekroczono czas (Timeout serwera)' : err.message.split('\n')[0];
-            console.warn(`[ETAP 1]: [${i+1}/${sites.length}] Pomijam stronę. Powód: ${error_reason}`);
+            console.warn(`[ETAP 1.0]: [${i+1}/${sites.length}] Pomijam stronę. Powód: ${error_reason}`);
             fs.appendFileSync('bledy_e1.txt', `${originUrl} [Etap 1 Kategoria]: ${error_reason}\n`);
-            console.warn(`[ETAP 1]: [${i+1}/${sites.length}] POMINIĘTO: ${originUrl}.\n`);
+            console.warn(`[ETAP 1.0]: [${i+1}/${sites.length}] POMINIĘTO: ${originUrl}.\n`);
         } finally {
             await context.close();
         }
