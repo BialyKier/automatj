@@ -35,8 +35,10 @@ async function run() {
     let successAlert: Locator;
     let errorAlert: Locator;
     
-    const timeout = 20000;
-    const defaulttimeout = 50000;
+    const timeout = 140000;
+    const defaulttimeout = 40000;
+
+    const timeoutImg = 5000;
     
     // 1. Wczytanie pliku CSV
     const csvData = fs.readFileSync('strony.csv', 'utf-8');
@@ -397,11 +399,11 @@ for(const site of pagesAfterE1) {
                 console.log(`[ETAP 2.9]: [${nr}/${pagesAfterE1.length}] Przejście do formularza wyboru - obraz`);
 
                 const tabObrazki = page.getByRole('tab', { name: /Obrazki i łącza/i });
-                await tabObrazki.waitFor({ state: 'visible', timeout });
+                await tabObrazki.waitFor({ state: 'visible', timeout: timeoutImg });
                 await tabObrazki.click();
                 
                 const btnWybierz = page.getByRole('button', { name: 'Wybierz' }).first();
-                await btnWybierz.waitFor({ state: 'visible', timeout });
+                await btnWybierz.waitFor({ state: 'visible', timeout: timeoutImg });
                 await btnWybierz.click();
                 
                 // Stabilny locator do iframe mediów Joomla
@@ -409,7 +411,7 @@ for(const site of pagesAfterE1) {
                 
                 // Czekamy chwilę, aż zawartość iframe się załaduje
                 console.log(`[ETAP 2.9]: [${nr}/${pagesAfterE1.length}] Oczekiwanie: stabilizacja iframe 4s`);
-                await page.waitForTimeout(4000);
+                await page.waitForTimeout(timeoutImg);
                 
                 // Wgrywanie pliku
                 console.log(`[ETAP 2.9]: [${nr}/${pagesAfterE1.length}] Wgrywanie pliku - obraz`);
@@ -418,7 +420,7 @@ for(const site of pagesAfterE1) {
                 const imageName = path.basename(localImagePath);
                 const kafelekZdjecia = mediaFrame.getByText(imageName, { exact: true }).first();
                 
-                if (await kafelekZdjecia.isVisible({ timeout: timeout }).catch(() => false)) {
+                if (await kafelekZdjecia.isVisible({ timeout: timeoutImg }).catch(() => false)) {
                     console.log(`[ETAP 2.9]: [${nr}/${pagesAfterE1.length}] Plik "${imageName}" już jest na liście.`);
                 } else {
                     console.log(`[ETAP 2.9]: [${nr}/${pagesAfterE1.length}] Wgrywanie pliku - obraz: ${imageName}`);
@@ -427,18 +429,18 @@ for(const site of pagesAfterE1) {
                     const fileInput = mediaFrame.locator('input[type="file"]').first();
                     if (await fileInput.count() > 0) {
                         await fileInput.setInputFiles(localImagePath);
-                        await page.waitForTimeout(timeout); // Dajemy chwilę na transfer pliku
+                        await page.waitForTimeout(timeoutImg); // Dajemy chwilę na transfer pliku
                         }
                     }
                     
                     // Wybór wgranego zdjęcia i zatwierdzenie
                     console.log(`[ETAP 2.9]: [${nr}/${pagesAfterE1.length}] Wgrywanie pliku obraz - ustawianie: ${imageName}`);
-                    await kafelekZdjecia.waitFor({ state: 'visible', timeout });
+                    await kafelekZdjecia.waitFor({ state: 'visible', timeout: timeoutImg });
                     await kafelekZdjecia.click();
                     
                     // Krótka pauza na ustabilizowanie się interfejsu po zaznaczeniu zdjęcia
                     console.log(`[ETAP 2.9]: [${nr}/${pagesAfterE1.length}] Oczekiwanie: stabilizacja interfejsu 4s`);
-                    await page.waitForTimeout(4000);
+                    await page.waitForTimeout(timeoutImg);
 
                     console.log(`[ETAP 2.9]: [${nr}/${pagesAfterE1.length}] Wgrywanie pliku obraz - zatwierdzanie: ${imageName}`);
                     
@@ -449,7 +451,8 @@ for(const site of pagesAfterE1) {
                 } catch (mediaErr: any) {console.warn(`[ETAP 2.9]: [${nr}/${pagesAfterE1.length}] Krok 2.9: ${mediaErr.message.split('\n')[0]} - Błąd`);}
 
             
-            await page.getByRole('button', { name: 'Zapisz', exact: true }).click();
+            // await page.getByRole('button', { name: 'Zapisz', exact: true }).click();
+            await page.getByRole('button', { name: 'Zapisz i zamknij' }).click();
             await Promise.race([
                 successAlert.first().waitFor({ state: 'visible', timeout: timeout }),
                 errorAlert.first().waitFor({ state: 'visible', timeout: timeout })
