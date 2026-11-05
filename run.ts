@@ -21,7 +21,7 @@ async function run() {
     const h1TitleSecond = 'Artykuły blogowe';
 
     const postTitle = 'Witaj w blogu!';
-    const excerptText = 'Został on stworzony, żeby przybliżyć niniejszą działalność. ';
+    const postExcerpt = 'Został on stworzony, żeby przybliżyć niniejszą działalność. ';
     const postContent = 'Znajdziesz tu różne artykuły przedstawiające oferowane produkty oraz świadczone usługi. Miłej lektury!';
     
     let udane_e1 = 0;
@@ -32,8 +32,8 @@ async function run() {
     let successAlert: Locator;
     let errorAlert: Locator;
     
-    const timeout = 40000;
-    const defaulttimeout = 100000;
+    const timeout = 20000;
+    const defaulttimeout = 50000;
     
     // 1. Wczytanie pliku CSV
     const csvData = fs.readFileSync('strony.csv', 'utf-8');
@@ -91,7 +91,7 @@ async function run() {
             await page.getByRole('button', { name: 'Zaloguj' }).click();
 
             // KROK 3: Weryfikacja logowania 
-            await page.getByRole('textbox', { name: 'Hasło' }).waitFor({ state: 'detached', timeout });
+            await page.getByRole('textbox', { name: 'Hasło' }).waitFor({ state: 'detached', timeout: timeout });
             
             // ### TWORZENIE KATEGORII
             console.log(`[ETAP 1]: [${i+1}/${sites.length}] Tworzenie kategorii: ${originUrl}`);
@@ -105,8 +105,8 @@ async function run() {
             // Krok 3: Zapis kategorii, weryfikacja zapisu oraz alternatywna kategoria
             await page.getByRole('button', { name: 'Zapisz', exact: true }).click();
             await Promise.race([
-                successAlert.first().waitFor({ state: 'visible', timeout }),
-                errorAlert.first().waitFor({ state: 'visible', timeout })
+                successAlert.first().waitFor({ state: 'visible', timeout: timeout }),
+                errorAlert.first().waitFor({ state: 'visible', timeout: timeout })
             ]);
             
             if(await errorAlert.first().isVisible()) {
@@ -119,8 +119,8 @@ async function run() {
                 await page.getByRole('button', { name: 'Zapisz', exact: true }).click();
                 
                 await Promise.race([
-                    successAlert.first().waitFor({ state: 'visible', timeout }),
-                    errorAlert.first().waitFor({ state: 'visible', timeout })
+                    successAlert.first().waitFor({ state: 'visible', timeout: timeout }),
+                    errorAlert.first().waitFor({ state: 'visible', timeout: timeout })
                 ]);
                 
                 if(await errorAlert.first().isVisible()) {
@@ -144,20 +144,20 @@ async function run() {
                     await kolumna12.click();
                     
                     const blokTresc = page.getByText('Treść', {exact: true}).last();
-                    await blokTresc.waitFor({ state: 'visible', timeout });
+                    await blokTresc.waitFor({ state: 'visible', timeout: timeout });
                     await blokTresc.click();
                     
                     await page.getByRole('menuitem', { name: 'Narzędzia' }).click();
                     await page.getByText('Kod źródłowy').click();
                     
                     const oknoKodu = page.getByRole('dialog', { name: 'Kod źródłowy' });
-                    await oknoKodu.waitFor({ state: 'visible', timeout });
+                    await oknoKodu.waitFor({ state: 'visible', timeout: timeout });
                     
                     await oknoKodu.locator('textarea').fill(`<h1>${h1Title}</h1>`);
                     
                     await oknoKodu.getByRole('button', { name: 'Zapisz' }).click();
                     
-                    await oknoKodu.waitFor({ state: 'hidden', timeout });
+                    await oknoKodu.waitFor({ state: 'hidden', timeout: timeout });
                     
                     console.log(`[ETAP 1]: [${i+1}/${sites.length}] Dodano nagłówek <h1> do kategorii`);
                 
@@ -186,8 +186,8 @@ async function run() {
             await page.getByRole('button', { name: 'Zapisz i zamknij' }).click();
             
             await Promise.race([
-                successAlert.first().waitFor({ state: 'visible', timeout }),
-                errorAlert.first().waitFor({ state: 'visible', timeout })
+                successAlert.first().waitFor({ state: 'visible', timeout: timeout }),
+                errorAlert.first().waitFor({ state: 'visible', timeout: timeout })
             ]);
             
             if(await errorAlert.first().isVisible()) {
@@ -247,7 +247,7 @@ for(const site of pagesAfterE1) {
             await page.getByRole('button', { name: 'Zaloguj' }).click();
 
             // KROK 3: Weryfikacja logowania 
-            await page.getByRole('textbox', { name: 'Hasło' }).waitFor({ state: 'detached', timeout });
+            await page.getByRole('textbox', { name: 'Hasło' }).waitFor({ state: 'detached', timeout: timeout });
             
             // ### TWORZENIE WPISU
             console.log(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] Tworzenie wpisu: ${originUrl}`);
@@ -262,72 +262,188 @@ for(const site of pagesAfterE1) {
             console.log(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] Wybór alternatywnego układu: ${originUrl}`);
             
             await page.locator('joomla-field-fancy-select').first().click();
-            
+
             await page.getByRole('option', { name: site.category, exact: true }).click();
             
+
+            
+            // TUTAJ MI PRZESTAJE DZIAŁAĆ
             // KROK 4: Wybór Meta - noindex, nofollow
-            const metaDaneButton = page.getByRole('button', { name: 'Meta dane ' });
-            if(await metaDaneButton.isVisible()){
+            // const metaDaneButton = page.getByRole('tab', { name: /Meta dane/i }).or(page.getByRole('button', { name: /Meta dane/i }));
+            // if(await metaDaneButton.isVisible()){
+            //     await metaDaneButton.click();
+            //     const selectNoindex = page.locator('#jform_metadata_robots').or(page.getByLabel(/Wyszukiwarki/i));
+            //     await selectNoindex.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+            //     if( await selectNoindex.isVisible()) {
+            //         const noIndexOption = (await selectNoindex.locator('option[value="noindex, nofollow"]').count()) > 0;
+            //         if(noIndexOption) {
+            //             await selectNoindex.selectOption('noindex, nofollow');
+            //             console.log(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] Ustawiono meta tag "noindex, nofollow"`);
+            //         } else {
+            //             console.log(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] Opcja "noindex, nofollow" nie jest dostępna w tym szablonie, pomijanie zmiany meta tagu`);
+            //         }
+            //     }
+            // }
+
+
+            const metaDaneButton = page.getByRole('button',{name: 'Meta dane'});
+            if(await metaDaneButton.isVisible({timeout:timeout}).catch(() => false)){
                 await metaDaneButton.click();
-                const selectNoindex = page.getByLabel('Wyszukiwarki');
-                if( await selectNoindex.isVisible()) {
-                    const noIndexOption = (await selectNoindex.locator('option[value="noindex, nofollow"]').count()) > 0;
-                    if(noIndexOption) {
-                        await selectNoindex.selectOption('noindex, nofollow');
-                        console.log(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] Ustawiono meta tag "noindex, nofollow"`);
-                    } else {
-                        console.log(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] Opcja "noindex, nofollow" nie jest dostępna w tym szablonie, pomijanie zmiany meta tagu`);
-                    }
-                }
             }
+
+            const selectRobots = page.locator('select').filter({hasText: /noindex/i }).first();
+
+            await selectRobots.selectOption({ label: 'noindex, nofollow'}, {force:true});
+
+            await selectRobots.dispatchEvent('change');
+
+            console.log(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] Ustawiono meta tag "noindex, nofollow"`);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             
-            await page.getByRole('button', { name: 'Zapisz', exact: true }).click();
-            await Promise.race([
-                successAlert.first().waitFor({ state: 'visible', timeout }),
-                errorAlert.first().waitFor({ state: 'visible', timeout })
-            ]);
+            // await page.getByRole('button', { name: 'Zapisz', exact: true }).click();
+            // await Promise.race([
+            //     successAlert.first().waitFor({ state: 'visible', timeout: timeout }),
+            //     errorAlert.first().waitFor({ state: 'visible', timeout: timeout })
+            // ]);
             
-            if(await errorAlert.first().isVisible()) {
-                const trescBledy = await errorAlert.first().locator('.alert-message').innerText();
-                throw new Error(`Błąd przy dodawaniu wpisu: ${trescBledy}`);
-            }
-            
-            // KROK 5: Dodawanie treści wpisu
-            const kolumna12Add = page.locator('.btn-grid, button, a').filter({hasText: /kolumna\s*-12/i }).first();
-            if((await kolumna12Add.isVisible({timeout}).catch(() => false))){
-                await kolumna12Add.click();
+            // if(await errorAlert.first().isVisible()) {
+            //     const trescBledy = await errorAlert.first().locator('.alert-message').innerText();
+            //     throw new Error(`Błąd przy dodawaniu wpisu: ${trescBledy}`);
+            // }
+
+
+
+// Krok 1: Dodawanie nagłówka h1 do treści kategorii blabla
+         
+                // const kolumna12 = page.getByText('kolumna -12');
+                // if((await kolumna12.count()) > 0){
+                //     await kolumna12.click();
+                    
+                //     const blokTresc = page.getByText('Treść', {exact: true}).last();
+                //     await blokTresc.waitFor({ state: 'visible', timeout: timeout });
+                //     await blokTresc.click();
+                    
+                //     await page.getByRole('menuitem', { name: 'Narzędzia' }).click();
+                //     await page.getByText('Kod źródłowy').click();
+                    
+                //     const oknoKodu = page.getByRole('dialog', { name: 'Kod źródłowy' });
+                //     await oknoKodu.waitFor({ state: 'visible', timeout: timeout });
+                    
+                //     await oknoKodu.locator('textarea').fill(`<p>${excerptText}</p>`);
+                    
+                //     await oknoKodu.getByRole('button', { name: 'Zapisz' }).click();
+                    
+                //     await oknoKodu.waitFor({ state: 'hidden', timeout: timeout });
+                // }
+
+                // const readmore = page.getByText('Czytaj więcej', { exact: true });
+                // if((await readmore.count()) > 0){
+                //     await readmore.click();
+                // }
+
+                //     const kolumna12_2 = page.getByText('kolumna -12');
+                // if((await kolumna12_2.count()) > 0){
+                //     await kolumna12_2.click();
+                    
+                //     const blokTresc = page.getByText('Treść', {exact: true}).last();
+                //     await blokTresc.waitFor({ state: 'visible', timeout: timeout });
+                //     await blokTresc.click();
+                    
+                //     await page.getByRole('menuitem', { name: 'Narzędzia' }).click();
+                //     await page.getByText('Kod źródłowy').click();
+                    
+                //     const oknoKodu = page.getByRole('dialog', { name: 'Kod źródłowy' });
+                //     await oknoKodu.waitFor({ state: 'visible', timeout: timeout });
+                    
+                //     await oknoKodu.locator('textarea').fill(`<p>${postContent}</p>`);
+                    
+                //     await oknoKodu.getByRole('button', { name: 'Zapisz' }).click();
+                    
+                //     await oknoKodu.waitFor({ state: 'hidden', timeout: timeout });
+                // }
+
+
+
+
+
+ // Krok 1: Dodawanie nagłówka h1 do treści kategorii
+       
+  // --- PIERWSZY BLOK (Wprowadzenie / Excerpt) ---
+const kolumna12 = page.getByText('kolumna -12').first();
+
+if (await kolumna12.isVisible({ timeout }).catch(() => false)) {
+    await kolumna12.click();
+    
+    // Klikamy w pierwszy dostępny blok "Treść"
+    await page.locator('div').filter({ hasText: /^Treść$/ }).first().click();
+    
+    await page.getByRole('menuitem', { name: 'Narzędzia' }).click();
+    await page.getByText('Kod źródłowy').click();
+    
+    const oknoKodu = page.getByRole('dialog', { name: 'Kod źródłowy' });
+    await oknoKodu.waitFor({ state: 'visible', timeout });
+    
+    await oknoKodu.locator('textarea').fill(`<p>${postExcerpt}</p>`);
+    
+    await oknoKodu.getByRole('button', { name: 'Zapisz' }).click();
+    await oknoKodu.waitFor({ state: 'hidden', timeout });
+}
                 
-                const blokTresc = page.getByText('Treść', {exact: true}).last();
-                await blokTresc.waitFor({ state: 'visible', timeout });
-                await blokTresc.click();
-                await page.getByRole('menuitem', { name: 'Narzędzia' }).click();
-                await page.getByText('Kod źródłowy').click();
-                const oknoKodu = page.getByRole('dialog', { name: 'Kod źródłowy' });
-                await oknoKodu.waitFor({ state: 'visible', timeout });
-                await oknoKodu.locator('textarea').fill(`<p>${excerptText}</p>`);
-                await oknoKodu.getByRole('button', { name: 'Zapisz' }).click();
-                await oknoKodu.waitFor({ state: 'hidden', timeout });
+
+// --- SEPARATOR "Czytaj więcej" ---
+const readMoreBtn = page.getByText('Czytaj więcej', { exact: true });
+if (await readMoreBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+    await readMoreBtn.click();
+}
+
+
+// --- DRUGi BLOK (Pełna treść / Post Content) ---
+// Pobieramy kolumnę ponownie (lub bierzemy kolejną), żeby uniknąć starych referencji DOM
+const kolumna12_2 = page.getByText('kolumna -12').last();
+
+if (await kolumna12_2.isVisible({ timeout }).catch(() => false)) {
+    await kolumna12_2.click();
+    
+    // Kluczowa zmiana: bierzemy OSTATNI blok "Treść", który pojawił się po "Czytaj więcej"
+    await page.locator('div').filter({ hasText: /^Treść$/ }).last().click();
+    
+    // Używamy .last() dla menu narzędzi, aby otworzyć edytor powiązany z drugim blokiem
+    await page.getByRole('menuitem', { name: 'Narzędzia' }).last().click();
+    await page.getByText('Kod źródłowy').last().click();
+    
+    const oknoKodu_2 = page.getByRole('dialog', { name: 'Kod źródłowy' }).last();
+    await oknoKodu_2.waitFor({ state: 'visible', timeout });
+    
+    await oknoKodu_2.locator('textarea').fill(`<p>${postContent}</p>`);
+    
+    await oknoKodu_2.getByRole('button', { name: 'Zapisz' }).last().click();
+    await oknoKodu_2.waitFor({ state: 'hidden', timeout });
+}
+
+
                 
-                const readmore = page.getByText("Czytaj więcej").first();
-                if(await readmore.isVisible({timeout}).catch(() => false)) {
-                    await readmore.click();
-                }
-                
-                await kolumna12Add.click();
-                
-                const blokTresc2 = page.getByText('Treść', {exact: true}).last();
-                await blokTresc2.waitFor({ state: 'visible', timeout });
-                await blokTresc2.click();
-            
-                await page.getByRole('menuitem', { name: 'Narzędzia' }).last().click();
-                await page.getByText('Kod źródłowy').last().click();
-                
-                const oknoKodu2 = page.getByRole('dialog', { name: 'Kod źródłowy' }).last();
-                await oknoKodu2.waitFor({ state: 'visible', timeout });
-                await oknoKodu2.locator('textarea').fill(`<p>${postContent}</p>`);
-                await oknoKodu2.getByRole('button', { name: 'Zapisz' }).click();
-                await oknoKodu2.waitFor({ state: 'hidden', timeout });
-            }
                
 
 
@@ -336,8 +452,8 @@ for(const site of pagesAfterE1) {
 
             await page.getByRole('button', { name: 'Zapisz', exact: true }).click();
             await Promise.race([
-                successAlert.first().waitFor({ state: 'visible', timeout }),
-                errorAlert.first().waitFor({ state: 'visible', timeout })
+                successAlert.first().waitFor({ state: 'visible', timeout: timeout }),
+                errorAlert.first().waitFor({ state: 'visible', timeout: timeout })
             ]);
             
             if(await errorAlert.first().isVisible()) {
