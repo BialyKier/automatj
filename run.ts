@@ -262,200 +262,64 @@ for(const site of pagesAfterE1) {
             console.log(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] Wybór alternatywnego układu: ${originUrl}`);
             
             await page.locator('joomla-field-fancy-select').first().click();
-
             await page.getByRole('option', { name: site.category, exact: true }).click();
             
-
-            
-            // TUTAJ MI PRZESTAJE DZIAŁAĆ
-            // KROK 4: Wybór Meta - noindex, nofollow
-            // const metaDaneButton = page.getByRole('tab', { name: /Meta dane/i }).or(page.getByRole('button', { name: /Meta dane/i }));
-            // if(await metaDaneButton.isVisible()){
-            //     await metaDaneButton.click();
-            //     const selectNoindex = page.locator('#jform_metadata_robots').or(page.getByLabel(/Wyszukiwarki/i));
-            //     await selectNoindex.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
-            //     if( await selectNoindex.isVisible()) {
-            //         const noIndexOption = (await selectNoindex.locator('option[value="noindex, nofollow"]').count()) > 0;
-            //         if(noIndexOption) {
-            //             await selectNoindex.selectOption('noindex, nofollow');
-            //             console.log(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] Ustawiono meta tag "noindex, nofollow"`);
-            //         } else {
-            //             console.log(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] Opcja "noindex, nofollow" nie jest dostępna w tym szablonie, pomijanie zmiany meta tagu`);
-            //         }
-            //     }
-            // }
-
-
+            // KROK 4: Ustawienie seo robots - noindex, nofollow 
             const metaDaneButton = page.getByRole('button',{name: 'Meta dane'});
             if(await metaDaneButton.isVisible({timeout:timeout}).catch(() => false)){
                 await metaDaneButton.click();
             }
 
             const selectRobots = page.locator('select').filter({hasText: /noindex/i }).first();
-
             await selectRobots.selectOption({ label: 'noindex, nofollow'}, {force:true});
-
             await selectRobots.dispatchEvent('change');
-
+            
             console.log(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] Ustawiono meta tag "noindex, nofollow"`);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             
-            // await page.getByRole('button', { name: 'Zapisz', exact: true }).click();
-            // await Promise.race([
-            //     successAlert.first().waitFor({ state: 'visible', timeout: timeout }),
-            //     errorAlert.first().waitFor({ state: 'visible', timeout: timeout })
-            // ]);
+            // KROK 4: Dodanie treści wpisu - zajawka, czytaj więcej, treść
             
-            // if(await errorAlert.first().isVisible()) {
-            //     const trescBledy = await errorAlert.first().locator('.alert-message').innerText();
-            //     throw new Error(`Błąd przy dodawaniu wpisu: ${trescBledy}`);
-            // }
+            const kolumna12 = page.getByText('kolumna -12').first();
+            
+            if (await kolumna12.isVisible({ timeout }).catch(() => false)) {
+                await kolumna12.click();
 
+                await page.locator('div').filter({ hasText: /^Treść$/ }).first().click();
+                await page.getByRole('menuitem', { name: 'Narzędzia' }).click();
+                await page.getByText('Kod źródłowy').click();
 
+                const oknoKodu = page.getByRole('dialog', { name: 'Kod źródłowy' });
+                await oknoKodu.waitFor({ state: 'visible', timeout });
+                await oknoKodu.locator('textarea').fill(`<p>${postExcerpt}</p>`);
+                await oknoKodu.getByRole('button', { name: 'Zapisz' }).click();
+                await oknoKodu.waitFor({ state: 'hidden', timeout });
+            }
+            
+            const readMoreBtn = page.getByText('Czytaj więcej', { exact: true });
+            if (await readMoreBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+                await readMoreBtn.click();
+            }
+            
+            const kolumna12_2 = page.getByText('kolumna -12').last();
+            
+            if (await kolumna12_2.isVisible({ timeout }).catch(() => false)) {
+                await kolumna12_2.click();
 
-// Krok 1: Dodawanie nagłówka h1 do treści kategorii blabla
-         
-                // const kolumna12 = page.getByText('kolumna -12');
-                // if((await kolumna12.count()) > 0){
-                //     await kolumna12.click();
-                    
-                //     const blokTresc = page.getByText('Treść', {exact: true}).last();
-                //     await blokTresc.waitFor({ state: 'visible', timeout: timeout });
-                //     await blokTresc.click();
-                    
-                //     await page.getByRole('menuitem', { name: 'Narzędzia' }).click();
-                //     await page.getByText('Kod źródłowy').click();
-                    
-                //     const oknoKodu = page.getByRole('dialog', { name: 'Kod źródłowy' });
-                //     await oknoKodu.waitFor({ state: 'visible', timeout: timeout });
-                    
-                //     await oknoKodu.locator('textarea').fill(`<p>${excerptText}</p>`);
-                    
-                //     await oknoKodu.getByRole('button', { name: 'Zapisz' }).click();
-                    
-                //     await oknoKodu.waitFor({ state: 'hidden', timeout: timeout });
-                // }
+                await page.locator('div').filter({ hasText: /^Treść$/ }).last().click();
+                await page.getByRole('menuitem', { name: 'Narzędzia' }).last().click();
+                await page.getByText('Kod źródłowy').last().click();
 
-                // const readmore = page.getByText('Czytaj więcej', { exact: true });
-                // if((await readmore.count()) > 0){
-                //     await readmore.click();
-                // }
-
-                //     const kolumna12_2 = page.getByText('kolumna -12');
-                // if((await kolumna12_2.count()) > 0){
-                //     await kolumna12_2.click();
-                    
-                //     const blokTresc = page.getByText('Treść', {exact: true}).last();
-                //     await blokTresc.waitFor({ state: 'visible', timeout: timeout });
-                //     await blokTresc.click();
-                    
-                //     await page.getByRole('menuitem', { name: 'Narzędzia' }).click();
-                //     await page.getByText('Kod źródłowy').click();
-                    
-                //     const oknoKodu = page.getByRole('dialog', { name: 'Kod źródłowy' });
-                //     await oknoKodu.waitFor({ state: 'visible', timeout: timeout });
-                    
-                //     await oknoKodu.locator('textarea').fill(`<p>${postContent}</p>`);
-                    
-                //     await oknoKodu.getByRole('button', { name: 'Zapisz' }).click();
-                    
-                //     await oknoKodu.waitFor({ state: 'hidden', timeout: timeout });
-                // }
-
-
-
-
-
- // Krok 1: Dodawanie nagłówka h1 do treści kategorii
-       
-  // --- PIERWSZY BLOK (Wprowadzenie / Excerpt) ---
-const kolumna12 = page.getByText('kolumna -12').first();
-
-if (await kolumna12.isVisible({ timeout }).catch(() => false)) {
-    await kolumna12.click();
-    
-    // Klikamy w pierwszy dostępny blok "Treść"
-    await page.locator('div').filter({ hasText: /^Treść$/ }).first().click();
-    
-    await page.getByRole('menuitem', { name: 'Narzędzia' }).click();
-    await page.getByText('Kod źródłowy').click();
-    
-    const oknoKodu = page.getByRole('dialog', { name: 'Kod źródłowy' });
-    await oknoKodu.waitFor({ state: 'visible', timeout });
-    
-    await oknoKodu.locator('textarea').fill(`<p>${postExcerpt}</p>`);
-    
-    await oknoKodu.getByRole('button', { name: 'Zapisz' }).click();
-    await oknoKodu.waitFor({ state: 'hidden', timeout });
-}
-                
-
-// --- SEPARATOR "Czytaj więcej" ---
-const readMoreBtn = page.getByText('Czytaj więcej', { exact: true });
-if (await readMoreBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
-    await readMoreBtn.click();
-}
-
-
-// --- DRUGi BLOK (Pełna treść / Post Content) ---
-// Pobieramy kolumnę ponownie (lub bierzemy kolejną), żeby uniknąć starych referencji DOM
-const kolumna12_2 = page.getByText('kolumna -12').last();
-
-if (await kolumna12_2.isVisible({ timeout }).catch(() => false)) {
-    await kolumna12_2.click();
-    
-    // Kluczowa zmiana: bierzemy OSTATNI blok "Treść", który pojawił się po "Czytaj więcej"
-    await page.locator('div').filter({ hasText: /^Treść$/ }).last().click();
-    
-    // Używamy .last() dla menu narzędzi, aby otworzyć edytor powiązany z drugim blokiem
-    await page.getByRole('menuitem', { name: 'Narzędzia' }).last().click();
-    await page.getByText('Kod źródłowy').last().click();
-    
-    const oknoKodu_2 = page.getByRole('dialog', { name: 'Kod źródłowy' }).last();
-    await oknoKodu_2.waitFor({ state: 'visible', timeout });
-    
-    await oknoKodu_2.locator('textarea').fill(`<p>${postContent}</p>`);
-    
-    await oknoKodu_2.getByRole('button', { name: 'Zapisz' }).last().click();
-    await oknoKodu_2.waitFor({ state: 'hidden', timeout });
-}
-
-
-                
-               
-
-
-
-
-
+                const oknoKodu_2 = page.getByRole('dialog', { name: 'Kod źródłowy' }).last();
+                await oknoKodu_2.waitFor({ state: 'visible', timeout });
+                await oknoKodu_2.locator('textarea').fill(`<p>${postContent}</p>`);
+                await oknoKodu_2.getByRole('button', { name: 'Zapisz' }).last().click();
+                await oknoKodu_2.waitFor({ state: 'hidden', timeout });
+            }
+            
             await page.getByRole('button', { name: 'Zapisz', exact: true }).click();
             await Promise.race([
                 successAlert.first().waitFor({ state: 'visible', timeout: timeout }),
                 errorAlert.first().waitFor({ state: 'visible', timeout: timeout })
             ]);
-            
             if(await errorAlert.first().isVisible()) {
                 const trescBledy = await errorAlert.first().locator('.alert-message').innerText();
                 throw new Error(`Błąd przy dodawaniu wpisu: ${trescBledy}`);
