@@ -266,7 +266,7 @@ for(const site of pagesAfterE1) {
             await page.getByRole('option', { name: site.category, exact: true }).click();
             
             // KROK 4: Wybór Meta - noindex, nofollow
-            const metaDaneButton = page.getByRole('button', { name: /meta dane/i });
+            const metaDaneButton = page.getByRole('button', { name: 'Meta dane ' });
             if(await metaDaneButton.isVisible()){
                 await metaDaneButton.click();
                 const selectNoindex = page.getByLabel('Wyszukiwarki');
@@ -308,7 +308,7 @@ for(const site of pagesAfterE1) {
                 await oknoKodu.getByRole('button', { name: 'Zapisz' }).click();
                 await oknoKodu.waitFor({ state: 'hidden', timeout });
                 
-                const readmore = page.getByText(/czytaj więcej/i).first();
+                const readmore = page.getByText("Czytaj więcej").first();
                 if(await readmore.isVisible({timeout}).catch(() => false)) {
                     await readmore.click();
                 }
