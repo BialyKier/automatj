@@ -528,11 +528,34 @@ for(const site of pagesAfterE1) {
             console.log(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] ETAP 2 ZAKOŃCZONY SUKCESEM: ${originUrl}.\n`);
     }
     catch (err: any) {
+        // nieudane_e2++;
+        // const error_reason = err.name === 'TimeoutError' ? 'Przekroczono czas (Timeout serwera)' : err.message.split('\n')[0];
+        // console.warn(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] Błąd podczas dodawania wpisu na: ${originUrl}`);
+        // fs.appendFileSync('bledy_e2.txt', `${originUrl} [Etap 2 Wpis]: ${error_reason}\n`);
+        // console.warn(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] POMINIĘTO: ${originUrl}.\n`);
+
         nieudane_e2++;
-        const error_reason = err.name === 'TimeoutError' ? 'Przekroczono czas (Timeout serwera)' : err.message.split('\n')[0];
-        console.warn(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] Błąd podczas dodawania wpisu na: ${originUrl}`);
-        fs.appendFileSync('bledy_e2.txt', `${originUrl} [Etap 2 Wpis]: ${error_reason}\n`);
-        console.warn(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] POMINIĘTO: ${originUrl}.\n`);
+
+    // 1. Bezpieczne wyciągnięcie wiadomości (obsługuje Error, stringi oraz inne typy)
+    let error_reason = '';
+    if (err instanceof Error) {
+        error_reason = err.name === 'TimeoutError' 
+            ? 'Przekroczono czas (Timeout serwera)' 
+            : err.message.split('\n')[0];
+    } else if (typeof err === 'string') {
+        error_reason = err;
+    } else {
+        error_reason = String(err);
+    }
+
+    // 2. Jeśli chcesz dopisać własny komunikat / kontekst do tego, co przyszło z throw:
+    const customMessage = ""; // Tutaj wpisz swój tekst lub zmienną
+    const final_error_reason = `${error_reason} | Kontekst: ${customMessage}`;
+
+    // Logowanie i zapis do pliku
+    console.warn(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] Błąd podczas dodawania wpisu na: ${originUrl}`);
+    fs.appendFileSync('bledy_e2.txt', `${originUrl} [Etap 2 Wpis]: ${final_error_reason}\n`);
+    console.warn(`[ETAP 2]: [${nr}/${pagesAfterE1.length}] POMINIĘTO: ${originUrl}.\n`);
     }
     finally {
         await context.close();
