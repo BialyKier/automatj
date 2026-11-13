@@ -269,11 +269,35 @@ async function run() {
             console.log(`[ETAP 1]: [${i+1}/${sites.length}] ETAP 1 ZAKOŃCZONY SUKCESEM: ${originUrl}.\n`);
         
         } catch (err: any) {
+            // nieudane_e1++;
+            // const error_reason = err.name === 'TimeoutError' ? 'Przekroczono czas (Timeout serwera)' : err.message.split('\n')[0];
+            // console.warn(`[ETAP 1.0]: [${i+1}/${sites.length}] Pomijam stronę. Powód: ${error_reason}`);
+            // fs.appendFileSync('bledy_e1.txt', `${originUrl} [Etap 1 Kategoria]: ${error_reason}\n`);
+            // console.warn(`[ETAP 1.0]: [${i+1}/${sites.length}] POMINIĘTO: ${originUrl}.\n`);
+
             nieudane_e1++;
-            const error_reason = err.name === 'TimeoutError' ? 'Przekroczono czas (Timeout serwera)' : err.message.split('\n')[0];
+
+            // 1. Bezpieczne wyciągnięcie wiadomości (obsługuje Error, stringi oraz inne typy)
+            let base_reason = '';
+            if (err instanceof Error) {
+                base_reason = err.name === 'TimeoutError' 
+                    ? 'Przekroczono czas (Timeout serwera)' 
+                    : err.message.split('\n')[0];
+            } else if (typeof err === 'string') {
+                base_reason = err;
+            } else {
+                base_reason = String(err);
+            }
+
+            // 2. Twój dodatkowy komunikat/kontekst do dopisania
+            const customMessage = "Dodatkowa informacja"; // Tutaj wpisz swój tekst, np. nazwę funkcji lub etap wewnątrz try
+            const error_reason = `${base_reason} | Kontekst: ${customMessage}`;
+
+            // 3. Logowanie i zapis
             console.warn(`[ETAP 1.0]: [${i+1}/${sites.length}] Pomijam stronę. Powód: ${error_reason}`);
             fs.appendFileSync('bledy_e1.txt', `${originUrl} [Etap 1 Kategoria]: ${error_reason}\n`);
             console.warn(`[ETAP 1.0]: [${i+1}/${sites.length}] POMINIĘTO: ${originUrl}.\n`);
+            
         } finally {
             await context.close();
         }
